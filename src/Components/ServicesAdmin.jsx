@@ -108,7 +108,6 @@ export default function ServicesAdmin (){
             advancedTime: advancedTime === "1" ? false : advancedTime === "2" ? true : false
         }
         try {
-            console.log(data);
             const res = await axios.post("https://laundryar7.runasp.net/api/Laundry/AddServices", data);
             toggleChange();
             setNameService("")
