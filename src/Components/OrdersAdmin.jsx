@@ -3,21 +3,25 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { FaXmark } from "react-icons/fa6";
 import { useAuth } from "./context/AuthContext";
+import EditOrderPrice from "./EditPriceService";
 
 export default function OrdersAdmin() {
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language;
   const [orders, setOrders] = useState([]);
   const [toggle, setToggle] = useState(false);
+  const [toggleEditPrice, setToggleEditPrice] = useState(false);
+  const [dataOrder, setDataOrder] = useState(null);
   const [statusOrder, setStatusOrder] = useState("");
   const [messageOrder, setMessageOrder] = useState("");
   const [currentOrderId, setCurrentOrderId] = useState(null);
+
 
   const getAllOrders = async () => {
     try {
       const res = await axios.get("https://laundryar7.runasp.net/api/Laundry/GetAllOrder");
       setOrders(res.data);
-
+      console.log(res.data);
     } catch (error) {
       console.error("Error fetching orders", error);
     }
@@ -69,8 +73,13 @@ export default function OrdersAdmin() {
   };
 
 
-
   return (
+    <>
+    <EditOrderPrice
+      toggle={toggleEditPrice}
+      setToggle={setToggleEditPrice}
+      dataOrder={dataOrder}
+    />
     <section>
       <div dir={currentLang === "ar" ? "rtl" : "ltr"} className={`${toggle ? "visible" : "invisible"} transition bg-[#00000096] fixed w-full h-full top-0 left-0 z-40 backdrop-blur-sm`}></div>
       <div className={`
@@ -132,7 +141,7 @@ export default function OrdersAdmin() {
               </tr>
             </thead>
             <tbody>
-              {[...orders].reverse().map((order, index) => (
+              {[...orders].map((order, index) => (
                 <tr key={order.orderID}>
                   <td className={`p-4 text-lg text-left bg-[#f9f9f9] dark:bg-gray-900 dark:text-gray-300 border-b-[2px] border-b-[#eee] dark:border-b-gray-800 ${currentLang === "ar" ? "border-l-[#eeee] dark:border-l-gray-700 border-l-2" : "border-r-[#eee] dark:border-r-gray-700 border-r-2"}`}>{order.orderID}</td>
                   <td className={`p-4 text-lg text-left bg-[#f9f9f9] dark:bg-gray-900 dark:text-gray-300 border-b-[2px] border-b-[#eee] dark:border-b-gray-800 ${currentLang === "ar" ? "border-l-[#eeee] dark:border-l-gray-700 border-l-2" : "border-r-[#eee] dark:border-r-gray-700 border-r-2"}`}>{order.personName}</td>
@@ -150,11 +159,21 @@ export default function OrdersAdmin() {
                     </ul>
                   </td>
                   <td className={`p-4 text-lg text-left bg-[#f9f9f9] dark:bg-gray-900 dark:text-gray-300 border-b-[2px] border-b-[#eee] dark:border-b-gray-800 ${currentLang === "ar" ? "border-l-[#eeee] dark:border-l-gray-700 border-l-2" : "border-r-[#eee] dark:border-r-gray-700 border-r-2"}`}>
-                    <button className="bg-blue-400 px-4 py-2 text-white rounded-lg cursor-pointer transition hover:bg-blue-500 shadow-md active:scale-95"
+                    <button className="bg-blue-400 px-4 py-2 text-white rounded-lg cursor-pointer transition hover:bg-blue-500 shadow-md active:scale-95 mb-3"
                       onClick={() => {
                         toggleChange()
                         setCurrentOrderId(order.orderID)
                       }}>{currentLang === "ar" ? "تغيير" : "Change"}</button>
+                      {order.services[0].unitPrice === 0 && (
+                        <button
+                        onClick={() => {
+                          setToggleEditPrice(!toggleEditPrice);
+                          setDataOrder(order);
+                        }}
+                        className="bg-green-400 px-4 py-2 text-white rounded-lg cursor-pointer transition hover:bg-green-500 shadow-md active:scale-95"
+                      
+                      >{currentLang === "ar" ? "تعديل" : "Edit"}</button>
+                      )}
                   </td>
                 </tr>
               ))}
@@ -162,6 +181,7 @@ export default function OrdersAdmin() {
           </table>
         )}
       </div>
-    </section >
+    </section>
+    </>
   );
 }

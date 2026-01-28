@@ -13,7 +13,7 @@ import {
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { FaCheck } from "react-icons/fa6";
-import { MdLocalLaundryService } from "react-icons/md";
+import { MdFilterAlt, MdLocalLaundryService } from "react-icons/md";
 import { IoClose } from "react-icons/io5";
 
 
@@ -29,16 +29,14 @@ export default function Services() {
   const [messageType, setMessageType] = useState("")
   const [qtyModal, setQtyModal] = useState(false);
   const [editingService, setEditingService] = useState(null);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
+  const [filterType, setFilterType] = useState("normal"); // normal, carpet
+  const [showFilter, setShowFilter] = useState(false);
+  
 
   useEffect(() => {
     getAllServces()
   }, [])
-
-  const ACTIONS = {
-    INC: "INCREMENT",
-    DEC: "DECREMENT"
-  };
 
 
   const getAllServces = async () => {
@@ -74,6 +72,21 @@ export default function Services() {
   }
 
   const confirmService = (id) => {
+    const selectedService = services.find(s => s.servicesID === id);
+    const isServiceCarpet = selectedService?.advancedTime === true;
+    
+    // if adding (not removing)
+    if (selectedServices.length > 0) {
+      const firstSelectedService = services.find(s => s.servicesID === selectedServices[0]);
+      const isFirstServiceCarpet = firstSelectedService?.advancedTime === true;
+      
+      // If mixing types, show message and return
+      if (isServiceCarpet !== isFirstServiceCarpet) {
+        alert(currentLang === "ar" ? "لا يمكن اختيار منتجات مختلفة" : "Cannot select different product types");
+        return;
+      }
+    }
+    
     if (!selectedServices.includes(id)) {
       setSelectedServices([...selectedServices, id]);
     }
@@ -81,6 +94,21 @@ export default function Services() {
   }
 
   const toggleServiceSelection = (id) => {
+    const selectedService = services.find(s => s.servicesID === id);
+    const isServiceCarpet = selectedService?.advancedTime === true;
+    
+    // إذا كان بيضيف (مش بيزيل)
+    if (!selectedServices.includes(id) && selectedServices.length > 0) {
+      const firstSelectedService = services.find(s => s.servicesID === selectedServices[0]);
+      const isFirstServiceCarpet = firstSelectedService?.advancedTime === true;
+      
+      if (isServiceCarpet !== isFirstServiceCarpet) {
+        setMessage(currentLang === "ar" ? "لا يمكن مزج منتجات مختلفة" : "Cannot mix different product types");
+        setTimeout(() => setMessage(""), 1900);
+        return;
+      }
+    }
+    
     setSelectedServices(prev =>
       prev.includes(id)
         ? prev.filter(s => s !== id)
@@ -140,6 +168,24 @@ export default function Services() {
 
     const selected = services.filter(serv => selectedServices.includes(serv.servicesID));
 
+   const filterProducts = selected.filter(serv => serv.advancedTime === true);
+
+    if (filterProducts.length > 0) {
+      const req = {
+      personId: parseFloat(userId),
+      phoneNumberPlus: phoneStr,
+      addressPlus: address,
+      totalAmount: handelAllTotal(),
+      services: filterProducts.map((ele) => ({
+        servicesID: ele.servicesID,
+        quantity: ele.quantity,
+        unitPrice: ele.unitPrice
+      }))
+      };
+      createOrderAdvancedTime(req);
+      return;
+     } 
+
     const payload = {
       personId: parseFloat(userId),
       phoneNumberPlus: phoneStr,
@@ -151,9 +197,23 @@ export default function Services() {
         unitPrice: ele.unitPrice
       }))
     };
-
     try {
       const res = await axios.post("https://laundryar7.runasp.net/api/Laundry/CreateOrder", payload);
+      setPhone("")
+      setAddress("")
+      setToggle(!toggle);
+      setMessage(currentLang === "ar" ? "تم إضافة الطلب بنجاح" : "Order placed successfully!")
+      setSelectedServices([])
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const createOrderAdvancedTime = async (payload) => {
+    console.log(payload);
+    
+     try {
+      const res = await axios.post("https://laundryar7.runasp.net/api/Laundry/CreateOrderAdvancdTime", payload);
       setPhone("")
       setAddress("")
       setToggle(!toggle);
@@ -172,6 +232,15 @@ export default function Services() {
 
   const currentEditingService = services.find(s => s.servicesID === editingService);
 
+  const getFilteredServices = () => {
+    if (filterType === "carpet") {
+      return services.filter(service => service.advancedTime === true);
+    } else if (filterType === "normal") {
+      return services.filter(service => service.advancedTime === false || service.advancedTime === null);
+    }
+    return services; 
+  };
+
 
 
   if (loading) {
@@ -188,7 +257,7 @@ export default function Services() {
     <div className="dark:bg-gray-800">
       <div dir={currentLang === "ar" ? "rtl" : "ltr"} className={`${toggle ? "visible" : "invisible"} transition bg-[#00000096] fixed w-full h-full top-0 left-0 z-40 backdrop-blur-sm`}></div>
       <p className={`${message ? " visible opacity-100 translate-y-0" : " invisible opacity-0 -translate-y-5"} 
-        duration-200  fixed top-28 left-1/2 -translate-x-1/2 bg-blue-400 text-white font-bold p-4 rounded-xl z-40`}>{message ? message : ""}</p>
+        duration-200  fixed top-28 left-1/2 -translate-x-1/2 bg-blue-400 text-white font-bold p-4 rounded-xl z-50`}>{message ? message : ""}</p>
       <div className={`
            ${toggle ? " scale-100" : " scale-0"}
              transition fixed z-50  bg-[#EEE] dark:bg-gray-900 py-9 px-6 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 lg:w-[55%] w-[95%] rounded-xl shadow-2xl border-2 border-white/50 dark:border-gray-700`}>
@@ -227,6 +296,7 @@ export default function Services() {
           <button onClick={handelMessage} type="submit" className="bg-blue-500 py-3 px-4 rounded-xl text-white lg:w-36 w-full text-lg cursor-pointer mt-3">  {t("orders.create")} </button>
         </form>
       </div>
+    
 
       {/* Quantity Modal */}
       <div dir={currentLang === "ar" ? "rtl" : "ltr"} className={`${qtyModal ? "visible" : "invisible"} transition bg-[#00000096] fixed w-full h-full top-0 left-0 z-[60] backdrop-blur-sm`}></div>
@@ -244,6 +314,7 @@ export default function Services() {
             <p className="text-gray-500 dark:text-gray-400 mb-6 font-semibold">
               {currentEditingService.unitPrice} {currentLang === "ar" ? "ج.م" : "EGP"} / {currentLang === "ar" ? "قطعة" : "unit"}
             </p>
+            
 
             <div className="flex items-center justify-center gap-6 mb-8">
               <button
@@ -284,14 +355,59 @@ export default function Services() {
       </div>
 
       <div className="coustom_container">
-        <div className="md:py-16 py-8">
+        <div className="md:py-16 py-8"
+        dir={currentLang === "ar" ? "rtl" : "ltr"}
+        >
           <h3 className="text-center text-4xl mb-6 pb-6 font-semibold text-[#1E5FAC] dark:text-blue-400" >  الخدمات  Servic<span className="">es</span> </h3>
+           <div 
+           dir={currentLang === "ar" ? "rtl" : "ltr"}
+           className="flex items-center gap-4 mb-8 flex-wrap"
+           >
+            <div className="flex items-center gap-2 p-2 bg-[#1E5FAC] rounded-xl text-white font-bold cursor-pointer hover:bg-blue-600 transition
+            relative"
+            onClick={() => setShowFilter(!showFilter)}
+            >
+              <MdFilterAlt size={28}/>
+              <span className="text-lg font-medium">{currentLang === "ar" ? "فلترة الخدمات" : "Filter Services"}</span>
+
+              {showFilter && (
+                <ul className={`absolute top-full ${currentLang === "ar" ? "right-0" : "left-0"} mt-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg w-48 z-50
+                p-2`}>
+                  <li>
+                    <button
+                      onClick={() => setFilterType("normal")}
+                      className={`px-4 py-1.5 rounded-xl font-bold text-lg transition w-full mb-2.5 ${
+                        filterType === "normal"
+                          ? "bg-[#1E5FAC] text-white"
+                          : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+                      }`}
+                    >
+                      {currentLang === "ar" ? "منتجات عادية" : "Normal Products"}
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => setFilterType("carpet")}
+                      className={`px-4 py-1.5  rounded-xl font-bold text-lg transition w-full ${
+                        filterType === "carpet"
+                          ? "bg-[#1E5FAC] text-white"
+                          : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+                      }`}
+                    >
+                      {currentLang === "ar" ? "منتجات سجاد" : "Carpet Products"}
+                    </button>
+                  </li>
+                </ul>
+              )}
+            </div>
+
+           </div>
 
           <section className="m-auto w-full " >
 
             <div className="w-full">
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5">
-                {services.map((ele) => (
+                {getFilteredServices().map((ele) => (
                   <div key={ele.servicesID} className="flex flex-col gap-1 items-center">
                     <div className="relative w-full max-w-[160px]">
                       <div className={`
@@ -339,6 +455,14 @@ export default function Services() {
                   </div>
                 ))}
               </div>
+              {filterType === "carpet" && getFilteredServices().length > 0 && (
+                <p
+                className="text-lg text-red-800 dark:bg-gray-900 bg-[#0D54A0]/30
+                p-3 rounded-lg mt-6 font-semibold w-fit"
+                > **{currentLang === "ar" ? 
+                  "يرجى العلم أن هذا النوع من المنتجات يتم تجهيزه بعد الطلب، لذلك سيصل خلال 9 أيام من تاريخ الطلب" 
+                  : "Please note that this type of product is prepared after ordering; therefore, it will be delivered within 9 days from the order date"} </p>
+              )}
             </div>
           </section>
           <div className="mt-10 pt-4 flex flex-col justify-center items-center gap-6">

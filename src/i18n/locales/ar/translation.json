@@ -50,6 +50,9 @@
   "dashboard": {
     "dashboard": " لوحة التحكم ",
     "users": "المستخدمون",
+    "select": "إختيار",
+    "advancedTime1": " منتجات عادية ",
+    "advancedTime2": " منتجات سجاد ",
     "orders": "الطلبات",
     "services": "الخدمات",
     "phoneNumber": "رقم الهاتف",

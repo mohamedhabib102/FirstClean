@@ -16,6 +16,7 @@ export default function ServicesAdmin (){
     const [toggle, setToggle] = useState(false);
     const [nameService, setNameService] = useState("");
     const [price, setPrice] = useState("");
+    const [advancedTime, setAdvancedTime] = useState("");
 
     const toggleChange = () => {
         setToggle(!toggle)
@@ -46,16 +47,19 @@ export default function ServicesAdmin (){
 
     const addNewService = async (e) => {
         e.preventDefault();
-
-        if (!price || !nameService){
+        
+        if (price === "" || !nameService){
             alert(t("dashboard.messageAddNewServe"))
             return;
         }
         const data = {
             servicesName: nameService,
-            unitPrice: price
+            unitPrice: Number(price),
+            advancedTime: Boolean(advancedTime)
         }
+
         try {
+            console.log(data);
             const res = await axios.post("https://laundryar7.runasp.net/api/Laundry/AddServices", data);
             toggleChange();
             setNameService("")
@@ -64,6 +68,13 @@ export default function ServicesAdmin (){
         } catch (error) {
             console.log(error);
         }
+    }
+
+
+    const handelChangeSelect = (e) => {
+        const value = e.target.value;
+        value === "true" ? setPrice(0) : setPrice("");
+        setAdvancedTime(value);
     }
     return (
         <section className="">
@@ -94,6 +105,18 @@ export default function ServicesAdmin (){
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
                     />
+                </div>
+
+                <div className="mb-4 last:mb-0">
+                    <select 
+                    className="px-4 py-3 rounded-xl w-full placeholder:text-lg placeholder:duration-200 focus:placeholder:opacity-0 outline-none bg-white dark:bg-gray-800 dark:text-white border border-transparent dark:border-gray-700 focus:border-blue-500"  
+                    name="advancedTime"
+                    onChange={handelChangeSelect}
+                    >
+                        <option value="0" disabled selected>{t("dashboard.select")}</option>
+                        <option value={false}>{t("dashboard.advancedTime1")}</option>
+                        <option value={true}>{t("dashboard.advancedTime2")}</option>
+                    </select>
                 </div>
                 <button type="submit" className="bg-blue-500 py-3 px-4 rounded-xl text-white lg:w-28 w-full text-lg cursor-pointer mt-3"> اضافة </button>
             </form>
