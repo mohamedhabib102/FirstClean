@@ -133,7 +133,6 @@ export default function Services() {
     );
   };
 
-   console.log(userId)
 
   const handleQuantityChange = (id, type) => {
     const updatedServices = services.map((item) => {
@@ -156,7 +155,6 @@ export default function Services() {
     });
 
     setServices(updatedServices);
-    console.log(id, type);
 
   };
 
