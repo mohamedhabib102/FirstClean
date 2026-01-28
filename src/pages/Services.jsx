@@ -51,7 +51,12 @@ export default function Services() {
       }));
       setServices(data)
     } catch (error) {
-      console.log(error);
+      // If API returns 404 treat it as no services available
+      if (error?.response?.status === 404) {
+        setServices([]);
+      } else {
+        console.log(error);
+      }
     } finally {
       setLoading(false)
     }
@@ -438,55 +443,68 @@ export default function Services() {
           <section className="m-auto w-full " >
 
             <div className="w-full">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5">
-                {getFilteredServices().map((ele) => (
-                  <div key={ele.servicesID} className="flex flex-col gap-1 items-center">
-                    <div className="relative w-full max-w-[160px]">
-                      <div className={`
-                          relative aspect-square bg-[#0D54A0]/20 dark:bg-blue-900/40 rounded-[25px] border-2 transition-all duration-300
-                          flex items-center justify-center overflow-hidden
-                          ${selectedServices.includes(ele.servicesID) ? "border-[#0D54A0] dark:border-blue-400 shadow-lg scale-[1.05]" : "border-transparent dark:border-gray-700"}
-                        `}>
-                        <MdLocalLaundryService size="85%" className="text-[#0D54A0] dark:text-blue-400 opacity-80" />
+              {getFilteredServices().length > 0 ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5">
+                  {getFilteredServices().map((ele) => (
+                    <div key={ele.servicesID} className="flex flex-col gap-1 items-center">
+                      <div className="relative w-full max-w-[160px]">
+                        <div className={`
+                            relative aspect-square bg-[#0D54A0]/20 dark:bg-blue-900/40 rounded-[25px] border-2 transition-all duration-300
+                            flex items-center justify-center overflow-hidden
+                            ${selectedServices.includes(ele.servicesID) ? "border-[#0D54A0] dark:border-blue-400 shadow-lg scale-[1.05]" : "border-transparent dark:border-gray-700"}
+                          `}>
+                          <MdLocalLaundryService size="85%" className="text-[#0D54A0] dark:text-blue-400 opacity-80" />
 
-                        <button
-                          onClick={() => {
-                            toggleQtyModal(ele.servicesID)
-                          }}
-                          className={`
-                              absolute bottom-2 right-2 w-9 h-9 rounded-xl flex items-center justify-center text-white transition-all duration-300 shadow-md z-10
-                              ${selectedServices.includes(ele.servicesID) ? "bg-green-500" : "bg-[#0D54A0] animate-pulse-custom"}
-                            `}
-                        >
-                          {selectedServices.includes(ele.servicesID) ? <span className="font-bold text-sm">{ele.quantity}</span> : <FaPlus size={14} />}
-                        </button>
-
-                        {selectedServices.includes(ele.servicesID) && (
                           <button
-                            type="button"
                             onClick={() => {
-                              toggleServiceSelection(ele.servicesID);
-                              setQtyModal(false);
+                              toggleQtyModal(ele.servicesID)
                             }}
-                            className="absolute top-1.5 left-1.5 w-7 h-7 rounded-xl bg-red-500 flex items-center justify-center text-white transition-all duration-300 shadow-md z-30"
+                            className={`
+                                absolute bottom-2 right-2 w-9 h-9 rounded-xl flex items-center justify-center text-white transition-all duration-300 shadow-md z-10
+                                ${selectedServices.includes(ele.servicesID) ? "bg-green-500" : "bg-[#0D54A0] animate-pulse-custom"}
+                              `}
                           >
-                            <IoClose size={20} />
+                            {selectedServices.includes(ele.servicesID) ? <span className="font-bold text-sm">{ele.quantity}</span> : <FaPlus size={14} />}
                           </button>
-                        )}
+
+                          {selectedServices.includes(ele.servicesID) && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                toggleServiceSelection(ele.servicesID);
+                                setQtyModal(false);
+                              }}
+                              className="absolute top-1.5 left-1.5 w-7 h-7 rounded-xl bg-red-500 flex items-center justify-center text-white transition-all duration-300 shadow-md z-30"
+                            >
+                              <IoClose size={20} />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="text-center mt-1">
+                        <h4 className="text-[#1E5FAC] dark:text-blue-400 font-bold text-sm md:text-base line-clamp-1">
+                          {ele.servicesName}
+                        </h4>
+                        <p className="text-[#0D54A0] dark:text-blue-300 font-bold text-xs md:text-sm opacity-80">
+                          {ele.unitPrice} {currentLang === "ar" ? "ج.م" : "EGP"}
+                        </p>
                       </div>
                     </div>
-
-                    <div className="text-center mt-1">
-                      <h4 className="text-[#1E5FAC] dark:text-blue-400 font-bold text-sm md:text-base line-clamp-1">
-                        {ele.servicesName}
-                      </h4>
-                      <p className="text-[#0D54A0] dark:text-blue-300 font-bold text-xs md:text-sm opacity-80">
-                        {ele.unitPrice} {currentLang === "ar" ? "ج.م" : "EGP"}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-gray-500 dark:text-gray-400 text-xl font-semibold">
+                    {filterType === "carpet"
+                      ? (currentLang === "ar" ? "لا توجد منتجات سجاد حالياً" : "No carpet services available")
+                      : filterType === "normal"
+                        ? (currentLang === "ar" ? "لا توجد منتجات عادية حالياً" : "No normal services available")
+                        : (currentLang === "ar" ? "لا توجد خدمات حالياً" : "No services available")
+                    }
+                  </p>
+                </div>
+              )}
               {filterType === "carpet" && getFilteredServices().length > 0 && (
                 <p
                 className="text-lg text-red-800 dark:bg-gray-900 bg-[#0D54A0]/30

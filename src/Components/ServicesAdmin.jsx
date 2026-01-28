@@ -105,9 +105,8 @@ export default function ServicesAdmin (){
         const data = {
             servicesName: nameService,
             unitPrice: Number(price),
-            advancedTime: Boolean(advancedTime)
+            advancedTime: advancedTime === "1" ? false : advancedTime === "2" ? true : false
         }
-
         try {
             console.log(data);
             const res = await axios.post("https://laundryar7.runasp.net/api/Laundry/AddServices", data);
@@ -214,8 +213,8 @@ export default function ServicesAdmin (){
                     onChange={handelChangeSelect}
                     >
                         <option value="" disabled>{t("dashboard.select")}</option>
-                        <option value="false">{t("dashboard.advancedTime1")}</option>
-                        <option value="true">{t("dashboard.advancedTime2")}</option>
+                        <option value="1">{t("dashboard.advancedTime1")}</option>
+                        <option value="2">{t("dashboard.advancedTime2")}</option>
                     </select>
                 </div>
                 <button type="submit" className="bg-blue-500 py-3 px-4 rounded-xl text-white lg:w-28 w-full text-lg cursor-pointer mt-3"> اضافة </button>

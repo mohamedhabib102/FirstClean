@@ -3,6 +3,7 @@ import axios from "axios";
 import { useAuth } from "../Components/context/AuthContext";
 import { useTranslation } from "react-i18next";
 import { FaXmark, FaCircleInfo } from "react-icons/fa6";
+import { FaBoxOpen } from "react-icons/fa";
 import { MdLocalLaundryService } from "react-icons/md";
 import { IoCalendarOutline, IoTimeOutline, IoDocumentTextOutline } from "react-icons/io5";
 import { SiTrueup } from "react-icons/si";
@@ -25,7 +26,12 @@ export default function Orders() {
       const res = await axios.get(`https://laundryar7.runasp.net/api/Laundry/GetOrderByID/${id}`);
       setOrders(Array.isArray(res.data) ? res.data : [res.data]);
     } catch (error) {
-      console.log(error);
+      // Treat 404 (no orders) as an empty list to avoid breaking the UI
+      if (error?.response?.status === 404) {
+        setOrders([]);
+      } else {
+        console.log(error);
+      }
     } finally {
       setLoading(false)
     }
