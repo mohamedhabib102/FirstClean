@@ -32,10 +32,13 @@ export default function Services() {
   const [loading, setLoading] = useState(false);
   const [filterType, setFilterType] = useState("normal"); // normal, carpet
   const [showFilter, setShowFilter] = useState(false);
+  const [deliveryFee, setDeliveryFee] = useState(0);
+  const [errorMessage, setErrorMessage] = useState("");
   
 
   useEffect(() => {
     getAllServces()
+    getDeliveryFee()
   }, [])
 
 
@@ -51,6 +54,15 @@ export default function Services() {
       console.log(error);
     } finally {
       setLoading(false)
+    }
+  }
+
+  const getDeliveryFee = async () => {
+    try {
+      const res = await axios.get("https://laundryar7.runasp.net/api/Laundry/GetDeliveryFee");
+      setDeliveryFee(res.data)
+    } catch (error) {
+      console.log("Error fetching delivery fee:", error);
     }
   }
 
@@ -116,6 +128,8 @@ export default function Services() {
     );
   };
 
+   console.log(userId)
+
   const handleQuantityChange = (id, type) => {
     const updatedServices = services.map((item) => {
       if (item.servicesID === id) {
@@ -148,9 +162,14 @@ export default function Services() {
     return total;
   };
 
+  const handelTotalWithDelivery = () => {
+    return handelAllTotal();
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setMessageType("")
+    setErrorMessage("")
 
     // Phone Validation: numbers only and >= 5 digits
     const phoneStr = String(phone || "").trim();
@@ -175,7 +194,7 @@ export default function Services() {
       personId: parseFloat(userId),
       phoneNumberPlus: phoneStr,
       addressPlus: address,
-      totalAmount: handelAllTotal(),
+      totalAmount: handelTotalWithDelivery(),
       services: filterProducts.map((ele) => ({
         servicesID: ele.servicesID,
         quantity: ele.quantity,
@@ -190,7 +209,7 @@ export default function Services() {
       personId: parseFloat(userId),
       phoneNumberPlus: phoneStr,
       addressPlus: address,
-      totalAmount: handelAllTotal(),
+      totalAmount: handelTotalWithDelivery(),
       services: selected.map((ele) => ({
         servicesID: ele.servicesID,
         quantity: ele.quantity,
@@ -206,6 +225,9 @@ export default function Services() {
       setSelectedServices([])
     } catch (error) {
       console.log(error);
+      if (error.response?.status === 400) {
+        setErrorMessage(currentLang === "ar" ? "سعر الطلب يجب أن يكون 60 ج.م على الأقل" : "Order price must be at least 80 EGP");
+      }
     }
   }
 
@@ -221,6 +243,9 @@ export default function Services() {
       setSelectedServices([])
     } catch (error) {
       console.log(error);
+      if (error.response?.status === 400) {
+        setErrorMessage(currentLang === "ar" ? "سعر الطلب يجب أن يكون 60 ج.م على الأقل" : "Order price must be at least 80 EGP");
+      }
     }
   }
 
@@ -266,6 +291,13 @@ export default function Services() {
         <p className={`text-red-500/50 font-bold z-40
           mb-2 ${currentLang === "ar" ? "text-right" : "text-left"}
           `}>{messageType ? messageType : ""}</p>
+        
+        {errorMessage && (
+          <p className="text-red-600 dark:text-red-400 font-bold text-center mb-4 p-3 bg-red-100 dark:bg-red-950/30 rounded-lg">
+            {errorMessage}
+          </p>
+        )}
+        
         <form
           onSubmit={handleSubmit}
           className="text-center">
@@ -468,14 +500,37 @@ export default function Services() {
           <div className="mt-10 pt-4 flex flex-col justify-center items-center gap-6">
 
             <div className="flex items-center justify-center lg:flex-row flex-col gap-8 
-              bg-[#0D54A0]/30 dark:bg-gray-900 p-4 md:w-[75%] h-45 w-full rounded-3xl">
-              <div className="bg-[#0D54A0] text-white text-2xl font-bold py-3 px-12 rounded-full shadow-lg flex items-center justify-center gap-4 min-w-[300px]">
-                <span>{t("orders.allTotal")}</span>
-                <span>{handelAllTotal()} {currentLang === "ar" ? "ج.م" : "EGP"}</span>
+              bg-[#0D54A0]/30 dark:bg-gray-900 p-6 md:w-[75%] w-full rounded-3xl">
+              
+              <div className="flex flex-col gap-3 w-full">
+                <div className="flex justify-between items-center bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm">
+                  <span className="text-gray-700 dark:text-gray-300 font-semibold">{t("orders.allTotal")}</span>
+                  <span className="text-xl font-bold text-[#0D54A0] dark:text-blue-400">
+                    {handelAllTotal()} {currentLang === "ar" ? "ج.م" : "EGP"}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm">
+                  <span className="text-gray-700 dark:text-gray-300 font-semibold">
+                    {currentLang === "ar" ? "رسوم التوصيل" : "Delivery Fee"}
+                  </span>
+                  <span className="text-xl font-bold text-green-600 dark:text-green-400">
+                    {deliveryFee} {currentLang === "ar" ? "ج.م" : "EGP"}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center bg-[#0D54A0] dark:bg-blue-600 rounded-2xl p-4 shadow-lg">
+                  <span className="text-white font-bold text-lg">
+                    {currentLang === "ar" ? "الإجمالي النهائي" : "Final Total"}
+                  </span>
+                  <span className="text-2xl font-bold text-white">
+                    {handelTotalWithDelivery() + deliveryFee} {currentLang === "ar" ? "ج.م" : "EGP"}
+                  </span>
+                </div>
               </div>
 
               <button
-                className={`block ${selectedServices.length > 0 ? "visible opacity-100" : "invisible opacity-0"} transition-all duration-300 bg-[#0D54A0] text-white text-2xl font-bold py-3 px-12 rounded-full shadow-lg flex items-center justify-center gap-4 min-w-[300px]`}
+                className={`block ${selectedServices.length > 0 ? "visible opacity-100" : "invisible opacity-0"} transition-all duration-300 bg-green-500 hover:bg-green-600 text-white text-xl font-bold py-4 px-8 rounded-2xl shadow-lg flex items-center justify-center gap-4 min-w-[280px]`}
                 onClick={() => {
                   toggleChange()
                 }}

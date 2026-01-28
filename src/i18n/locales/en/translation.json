@@ -17,7 +17,7 @@
     "quantity": "Quantity",
     "create": "Create Order",
     "total": "SubTotal",
-    "allTotal": "Total",
+    "allTotal": "Total for Your Orders",
     "statusNow": "Status changed successfully",
     "cancelNow": "Cancel",
     "max_delivery_time": "at most at 9:00 PM"

@@ -166,11 +166,35 @@ export default function Orders() {
 
                     <div className="flex items-center gap-3">
                       <IoDocumentTextOutline size={20} className="text-[#1E5FAC] dark:text-blue-400 flex-shrink-0" />
-                      <div className="flex flex-col">
-                        <span className="text-xs text-gray-400 dark:text-gray-500 font-bold uppercase">{t("ordersTable.total")}</span>
-                        <span className="text-xl font-black text-[#1E5FAC] dark:text-blue-400">
-                          {order.totalAmount} {currentLang === "ar" ? "ج.م" : "EGP"}
-                        </span>
+                      <div className="flex flex-col gap-1">
+                        <div>
+                          <span className="text-xs text-gray-400 dark:text-gray-500 font-bold uppercase">{t("ordersTable.total")}</span>
+                          <p className="text-lg font-black text-[#1E5FAC] dark:text-blue-400">
+                            {order.totalAmount} {currentLang === "ar" ? "ج.م" : "EGP"}
+                          </p>
+                        </div>
+                        
+                        {order.deliveryFee > 0 && (
+                          <div className="border-t border-gray-200 dark:border-gray-700 pt-1">
+                            <span className="text-xs text-gray-400 dark:text-gray-500 font-bold uppercase">
+                              {currentLang === "ar" ? "رسوم التوصيل" : "Delivery Fee"}
+                            </span>
+                            <p className="text-base font-bold text-green-600 dark:text-green-400">
+                              {order.deliveryFee} {currentLang === "ar" ? "ج.م" : "EGP"}
+                            </p>
+                          </div>
+                        )}
+
+                        {order.finalTotal > 0 && (
+                          <div className="border-t border-gray-200 dark:border-gray-700 pt-1 bg-[#1E5FAC]/10 dark:bg-blue-900/30 -mx-3 px-3 py-1 rounded">
+                            <span className="text-xs text-[#1E5FAC] dark:text-blue-400 font-bold uppercase">
+                              {currentLang === "ar" ? "الإجمالي النهائي" : "Final Total"}
+                            </span>
+                            <p className="text-lg font-black text-[#1E5FAC] dark:text-blue-400">
+                              {order.finalTotal} {currentLang === "ar" ? "ج.م" : "EGP"}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </div>
 
