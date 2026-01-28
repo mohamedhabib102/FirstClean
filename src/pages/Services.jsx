@@ -21,7 +21,7 @@ export default function Services() {
   const [services, setServices] = useState([]);
   const [selectedServices, setSelectedServices] = useState([]);
   const [toggle, setToggle] = useState(false);
-  const [phone, setPhone] = useState(null);
+  const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("")
   const { t, i18n } = useTranslation();
   const { userId } = useAuth()

@@ -21,7 +21,6 @@ export default function OrdersAdmin() {
     try {
       const res = await axios.get("https://laundryar7.runasp.net/api/Laundry/GetAllOrder");
       setOrders(res.data);
-      console.log(res.data);
     } catch (error) {
       console.error("Error fetching orders", error);
     }
@@ -79,6 +78,7 @@ export default function OrdersAdmin() {
       toggle={toggleEditPrice}
       setToggle={setToggleEditPrice}
       dataOrder={dataOrder}
+      onPriceUpdate={getAllOrders}
     />
     <section>
       <div dir={currentLang === "ar" ? "rtl" : "ltr"} className={`${toggle ? "visible" : "invisible"} transition bg-[#00000096] fixed w-full h-full top-0 left-0 z-40 backdrop-blur-sm`}></div>
@@ -125,7 +125,7 @@ export default function OrdersAdmin() {
       </div >
       <div className="overflow-x-auto m-auto w-full" dir={currentLang === "ar" ? "rtl" : "ltr"}>
         {orders.length === 0 ? (
-          <p className="text-center py-10 text-lg text-gray-500 dark:text-gray-400">{t("dashboard.notFoundOrders") || "Not Found Orders"}</p>
+          <p className="text-center py-10 text-lg text-gray-500 dark:text-gray-400">{currentLang === "ar" ? "لا توجد طلبات" : "No orders found"}</p>
         ) : (
           <table className="min-w-[1000px] border-spacing-0 w-full border-[2px] border-[#EEE] dark:border-gray-700">
             <thead>
@@ -138,6 +138,7 @@ export default function OrdersAdmin() {
                 <th className={`p-4 bg-white dark:bg-gray-800 text-blue-400 font-bold text-[20px] ${currentLang === "ar" ? "border-l-[#eeee] dark:border-l-gray-700 border-l-2 last:border-l-0" : "border-r-[#eee] dark:border-r-gray-700 border-r-2 last:border-r-0"}`}>{t("dashboard.orderDate")}</th>
                 <th className={`p-4 bg-white dark:bg-gray-800 text-blue-400 font-bold text-[20px] ${currentLang === "ar" ? "border-l-[#eeee] dark:border-l-gray-700 border-l-2 last:border-l-0" : "border-r-[#eee] dark:border-r-gray-700 border-r-2 last:border-r-0"}`}>{t("dashboard.services")}</th>
                 <th className={`p-4 bg-white dark:bg-gray-800 text-blue-400 font-bold text-[20px] ${currentLang === "ar" ? "border-l-[#eeee] dark:border-l-gray-700 border-l-2 last:border-l-0" : "border-r-[#eee] dark:border-r-gray-700 border-r-2 last:border-r-0"}`}>{t("dashboard.changeStatus")}</th>
+                <th className={`p-4 bg-white dark:bg-gray-800 text-blue-400 font-bold text-[20px] ${currentLang === "ar" ? "border-l-[#eeee] dark:border-l-gray-700 border-l-2 last:border-l-0" : "border-r-[#eee] dark:border-r-gray-700 border-r-2 last:border-r-0"}`}>{t("ordersTable.total")}</th>
               </tr>
             </thead>
             <tbody>
@@ -164,7 +165,6 @@ export default function OrdersAdmin() {
                         toggleChange()
                         setCurrentOrderId(order.orderID)
                       }}>{currentLang === "ar" ? "تغيير" : "Change"}</button>
-                      {order.services[0].unitPrice === 0 && (
                         <button
                         onClick={() => {
                           setToggleEditPrice(!toggleEditPrice);
@@ -173,7 +173,11 @@ export default function OrdersAdmin() {
                         className="bg-green-400 px-4 py-2 text-white rounded-lg cursor-pointer transition hover:bg-green-500 shadow-md active:scale-95"
                       
                       >{currentLang === "ar" ? "تعديل" : "Edit"}</button>
-                      )}
+                      
+                  </td>
+                    <td className={`p-4 text-lg text-left bg-[#f9f9f9] dark:bg-gray-900 dark:text-gray-300 border-b-[2px] border-b-[#eee] dark:border-b-gray-800 ${currentLang === "ar" ? "border-l-[#eeee] dark:border-l-gray-700 border-l-2" : "border-r-[#eee] dark:border-r-gray-700 border-r-2"}`}>
+                  
+                       {order.totalAmount} {currentLang === "ar" ? "ج.م" : "EGP"}
                   </td>
                 </tr>
               ))}

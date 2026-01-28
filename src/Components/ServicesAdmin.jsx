@@ -111,11 +111,12 @@ export default function ServicesAdmin (){
                     <select 
                     className="px-4 py-3 rounded-xl w-full placeholder:text-lg placeholder:duration-200 focus:placeholder:opacity-0 outline-none bg-white dark:bg-gray-800 dark:text-white border border-transparent dark:border-gray-700 focus:border-blue-500"  
                     name="advancedTime"
+                    value={advancedTime}
                     onChange={handelChangeSelect}
                     >
-                        <option value="0" disabled selected>{t("dashboard.select")}</option>
-                        <option value={false}>{t("dashboard.advancedTime1")}</option>
-                        <option value={true}>{t("dashboard.advancedTime2")}</option>
+                        <option value="" disabled>{t("dashboard.select")}</option>
+                        <option value="false">{t("dashboard.advancedTime1")}</option>
+                        <option value="true">{t("dashboard.advancedTime2")}</option>
                     </select>
                 </div>
                 <button type="submit" className="bg-blue-500 py-3 px-4 rounded-xl text-white lg:w-28 w-full text-lg cursor-pointer mt-3"> اضافة </button>

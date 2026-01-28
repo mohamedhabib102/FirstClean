@@ -124,7 +124,9 @@ export default function Orders() {
                           ? "bg-green-100 text-green-700 border border-green-300"
                           : "bg-blue-50 text-[#1E5FAC] border border-blue-100"
                       }`}>
-                      {order.status === "refused" ? "مرفوض" : order.status}
+                      {order.status === "refused" ? "مرفوض" : order.status === "Pending" ? 
+                      currentLang === "ar" ? "قيد الانتظار" : "Pending"
+                      : order.status}
                     </div>
                   </div>
                 </div>

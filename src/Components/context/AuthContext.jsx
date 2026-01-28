@@ -6,7 +6,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [userType, setUserType] = useState(null);
   const [userId, setUserId] = useState(null);
-  const [isLoading, setIsLoading] = useState(true); // ⬅️ حالة التحميل
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   const encrypt = (text) => {

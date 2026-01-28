@@ -6,7 +6,7 @@ import { FaXmark } from "react-icons/fa6";
 
 
 
-const EditOrderPrice = ({toggle, setToggle, dataOrder}) => {
+const EditOrderPrice = ({toggle, setToggle, dataOrder, onPriceUpdate}) => {
     const [totalPrice, setTotalPrice] = useState("");
       const { t, i18n } = useTranslation();
       const currentLang = i18n.language;
@@ -32,6 +32,9 @@ const EditOrderPrice = ({toggle, setToggle, dataOrder}) => {
           await axios.put(`https://laundryar7.runasp.net/api/Laundry/UpdateTotalPrice?OrderID=${orderId}&TotalAmount=${totalPrice}`);
           setToggle(!toggle);
           setTotalPrice("");
+          if (onPriceUpdate) {
+            onPriceUpdate();
+          }
         } catch (err) {
           console.log("Error updating status:", err);
         }
